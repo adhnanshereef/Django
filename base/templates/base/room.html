@@ -2,10 +2,49 @@
 
 
 {% block content %}
-
-<h1>room tempplate </h1>
-
-<h2>{{room.name}}</h2>
+<style>
+    .room-container{
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+    }
+</style>
+<div class="room-container" >
+<div>
+    <h1>{{room.name}}</h1>
 <p>{{room.description}}</p>
+<div class="comment-wrapper">
+    <h3>Conversations</h3>
+    <hr>
+    {% for room_message in room_messages %}
+    <div>
+        <small>@{{room_message.user}}   &nbsp &nbsp &nbsp   {{room_message.created|timesince}} ago</small>
+        <p>{{room_message.body}}</p>
+    </div>
+    {% endfor %}
 
+</div>
+
+
+{% if request.user.is_authenticated %}
+<div class="comment-form">
+    <form action="" method="POST" >
+        {% csrf_token %}
+        <input type="text" name="body" placeholder="Write your message here......." >
+    </form>
+</div>
+{% endif %}
+</div>
+
+<div class="participants">
+    <h3>
+        participants
+    </h3>
+    <hr>
+    {% for participant in participants %}
+    <h4>@{{participant}}</h4>
+    {% endfor %}
+</div>
+
+
+</div>
 {% endblock content %}
