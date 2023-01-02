@@ -1,0 +1,27 @@
+{% extends 'main.html' %} {% block content %}
+
+<style>
+  div {
+    padding: 10px;
+  }
+  .profile-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+  }
+</style>
+
+{{user.username}} {{user.email}} 
+{% if user == request.user %} 
+it's you 
+{% endif %}
+<!-- <h3>{{user.username}}'s Rooms</h3>
+<hr /> -->
+<div class="profile-container">
+  <div>{% include 'base/home_components/topic_component.html' %}</div>
+  <div>
+  {% include 'base/home_components/feed_component.html' %}
+  </div>
+  <div>{% include 'base/home_components/activity_component.html' %}</div>
+</div>
+
+{% endblock content %}

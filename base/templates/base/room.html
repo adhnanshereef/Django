@@ -44,7 +44,7 @@
     </h3>
     <hr>
     {% for participant in participants %}
-    <h4>@{{participant}}</h4>
+    <h4>@{{participant}}  {% if participant == room.host %}Admin{% endif %}</h4>
     {% endfor %}
 </div>
 
