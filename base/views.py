@@ -12,7 +12,7 @@ from .forms import RoomForm
 
 def signup(request):
     form = UserCreationForm()
-    if request.method=='POST':
+    if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
@@ -24,8 +24,9 @@ def signup(request):
             else:
                 return redirect('home')
         else:
-            messages.error(request, 'Ann error occured during signup! Try again')
-    
+            messages.error(
+                request, 'Ann error occured during signup! Try again')
+
     context = {'form': form}
     return render(request, 'base/signup.html', context)
 
@@ -74,14 +75,16 @@ def room(request, pk):
     room = Room.objects.get(id=pk)
     room_messages = room.message_set.all().order_by('-created')
     participants = room.participants.all()
-    if request.method=="POST" and request.user.is_authenticated:
+    if request.method == "POST" and request.user.is_authenticated:
         message = Message.objects.create(
             user=request.user,
             room=room,
             body=request.POST.get('body')
         )
-        return redirect('room',pk=room.id)
-    context = {'room': room, 'room_messages': room_messages,'participants':participants}
+        room.participants.add(request.user)
+        return redirect('room', pk=room.id)
+    context = {'room': room, 'room_messages': room_messages,
+               'participants': participants}
     return render(request, 'base/room.html', context)
 
 
@@ -91,7 +94,8 @@ def createRoom(request):
     if request.method == 'POST':
         form = RoomForm(request.POST)
         if form.is_valid():
-            form.save()
+            room = form.save()
+            room.participants.add(request.user)
             return redirect('home')
     context = {'form': form}
     return render(request, 'base/room_form.html', context)
@@ -121,4 +125,15 @@ def deleteRoom(request, pk):
         room.delete()
         return redirect('home')
     context = {'room': room}
+    return render(request, 'base/delete_room.html', context)
+
+@login_required(login_url='signin')
+def deleteMessage(request, pk):
+    message = Message.objects.get(id=pk)
+    if request.user != message.user:
+        return HttpResponse('404')
+    if request.method == 'POST':
+        message.delete()
+        return redirect('home')
+    context = {'obj': message}
     return render(request, 'base/delete_room.html', context)
