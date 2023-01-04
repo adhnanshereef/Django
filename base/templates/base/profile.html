@@ -1,27 +1,57 @@
 {% extends 'main.html' %} {% block content %}
+<main class="profile-page layout layout--3">
+  <div class="container">
+    <!-- Topics Start -->
+    {% include 'base/home_components/topic_component.html' %}
+    <!-- Topics End -->
 
-<style>
-  div {
-    padding: 10px;
-  }
-  .profile-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-  }
-</style>
+    <!-- Room List Start -->
+    <div class="roomList">
+      <div class="profile">
+        <div class="profile__avatar">
+          <div class="avatar avatar--large active">
+            <img src="https://randomuser.me/api/portraits/men/11.jpg" />
+          </div>
+        </div>
+        <div class="profile__info">
+          <h3>{{user.username}}</h3>
+          <p>@{{user.username}}</p>
+          <a href="edit-user.html" class="btn btn--main btn--pill"
+            >Edit Profile</a
+          >
+        </div>
+        <div class="profile__about">
+          <h3>About</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Consequuntur illo tenetur facilis sunt nemo debitis quisquam hic
+            atque aut? Ducimus alias placeat optio accusamus repudiandae quis ab
+            ex exercitationem rem?
+          </p>
+        </div>
+      </div>
 
-{{user.username}} {{user.email}} 
-{% if user == request.user %} 
-it's you 
-{% endif %}
-<!-- <h3>{{user.username}}'s Rooms</h3>
-<hr /> -->
-<div class="profile-container">
-  <div>{% include 'base/home_components/topic_component.html' %}</div>
-  <div>
-  {% include 'base/home_components/feed_component.html' %}
+      {% if rooms != None %}
+      <div class="roomList__header">
+        <div>
+          <h2>Study Rooms Hosted by {{user.username}}</h2>
+        </div>
+      </div>
+      {% include 'base/home_components/feed_component.html' %}
+      {% else %}
+      <div class="roomList__header">
+        <div>
+          <h2>{{user.username}} has no rooms</h2>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+    <!-- Room List End -->
+
+    <!-- Activities Start -->
+      {% include 'base/home_components/activity_component.html' %}
+    <!-- Activities End -->
   </div>
-  <div>{% include 'base/home_components/activity_component.html' %}</div>
-</div>
-
+</main>
 {% endblock content %}
