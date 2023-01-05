@@ -1,5 +1,6 @@
 {% extends 'main.html' %} {% block content %}
-<main class="create-room layout">
+
+<main class="update-account layout">
   <div class="container">
     <div class="layout__box">
       <div class="layout__boxHeader">
@@ -18,42 +19,52 @@
               ></path>
             </svg>
           </a>
-          <h3>Create/Edit Study Room</h3>
+          <h3>Edit your profile</h3>
         </div>
       </div>
       <div class="layout__body">
-        <form class="form" action="" method="POST">
-          {% csrf_token %}
-
+        <form class="form" method="POST" action="">
+          {% csrf_token %} {% for field in form %}
           <div class="form__group">
-            <label for="room_topic">Topic</label>
+            <label for="profile_pic">{{field.label}}</label>
+            {{field}}
+          </div>
+          {% endfor %}
+
+          <!-- <div class="form__group">
+            <label for="username">Username</label>
             <input
-              required
+              id="username"
+              name="username"
               type="text"
-              value="{{room.topic}}"
-              name="topic"
-              list="topic-list"
+              value="{{user.username}}"
+              placeholder="E.g. John doe"
             />
-            <datalist id="topic-list">
-              <select id="room_topic">
-                {% for topic in topics %}
-                <option value="{{topic}}">{{topic}}</option>
-                {% endfor %}
-              </select>
-            </datalist>
           </div>
 
           <div class="form__group">
-            <label for="room_name">Room Name</label>
-            {{form.name}}
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="text"
+              value="{{user.email}}"
+              placeholder="E.g. john@email.com"
+            />
           </div>
+
           <div class="form__group">
-            <label for="room_name">Description</label>
-            {{form.description}}
-          </div>
+            <label for="user_bio">Bio</label>
+            <textarea
+              name="user_bio"
+              id="user_bio"
+              value="{{user.bio}}"
+              placeholder="Write about yourself..."
+            ></textarea>
+          </div> -->
           <div class="form__action">
             <a class="btn btn--dark" href="{% url 'home' %}">Cancel</a>
-            <button class="btn btn--main" type="submit">Submit</button>
+            <button class="btn btn--main" type="submit">Update</button>
           </div>
         </form>
       </div>

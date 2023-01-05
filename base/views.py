@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from .models import Room, Topic, Message
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 
 
 def signup(request):
@@ -113,12 +113,11 @@ def createRoom(request):
     if request.method == 'POST':
         topic_name = request.POST.get('topic')
         topic, created = Topic.objects.get_or_create(name=topic_name)
-        form = RoomForm(request.POST)
         room = Room.objects.create(
-            host = request.user,
-            topic = topic,
-            name = request.POST.get('name'),
-            description = request.POST.get('description')
+            host=request.user,
+            topic=topic,
+            name=request.POST.get('name'),
+            description=request.POST.get('description')
         )
         room.participants.set([request.user])
         #     room.participants.add(request.user)
@@ -135,11 +134,14 @@ def updateRoom(request, pk):
     if request.user != room.host:
         return HttpResponse('404')
     if request.method == 'POST':
-        form = RoomForm(request.POST, instance=room)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    context = {'form': form, 'topic': topic}
+        topic_name = request.POST.get('topic')
+        topic, created = Topic.objects.get_or_create(name=topic_name)
+        room.name = request.POST.get('name')
+        room.description = request.POST.get('description')
+        room.topic = topic
+        room.save()
+        return redirect('home')
+    context = {'form': form, 'room': room, 'topic': topic}
     return render(request, 'base/room_form.html', context)
 
 
@@ -151,7 +153,7 @@ def deleteRoom(request, pk):
     if request.method == 'POST':
         room.delete()
         return redirect('home')
-    context = {'room': room}
+    context = {'obj': room}
     return render(request, 'base/delete_room.html', context)
 
 
@@ -165,3 +167,19 @@ def deleteMessage(request, pk):
         return redirect('home')
     context = {'obj': message}
     return render(request, 'base/delete_room.html', context)
+
+
+@login_required(login_url='signin')
+def editProfile(request):
+    user = request.user
+    form = UserForm(instance=user)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile', username=user.username )
+
+
+    context = {'user': user, 'form': form}
+    return render(request, 'base/edituser.html', context)
