@@ -74,7 +74,7 @@ def home(request):
 
 def profile(request, username):
     try:
-       profile = User.objects.get(username=username)
+        profile = User.objects.get(username=username)
     except:
         profile = None
 
@@ -82,7 +82,8 @@ def profile(request, username):
         rooms = profile.room_set.all()
         room_messages = profile.message_set.all()
         topics = Topic.objects.all()
-        context = {'user': profile, 'rooms':rooms,'room_messages':room_messages,'topics':topics}
+        context = {'user': profile, 'rooms': rooms,
+                   'room_messages': room_messages, 'topics': topics}
         return render(request, 'base/profile.html', context)
     else:
         return HttpResponse('404')
@@ -108,21 +109,28 @@ def room(request, pk):
 @login_required(login_url='signin')
 def createRoom(request):
     form = RoomForm()
+    topics = Topic.objects.all()
     if request.method == 'POST':
+        topic_name = request.POST.get('topic')
+        topic, created = Topic.objects.get_or_create(name=topic_name)
         form = RoomForm(request.POST)
-        if form.is_valid():
-            room = form.save(commit=False)
-            room.host = request.user
-            room.save()
-            room.participants.add(request.user)
-            return redirect('home')
-    context = {'form': form}
+        room = Room.objects.create(
+            host = request.user,
+            topic = topic,
+            name = request.POST.get('name'),
+            description = request.POST.get('description')
+        )
+        room.participants.set([request.user])
+        #     room.participants.add(request.user)
+        return redirect('home')
+    context = {'form': form, 'topics': topics}
     return render(request, 'base/room_form.html', context)
 
 
 @login_required(login_url='signin')
 def updateRoom(request, pk):
     room = Room.objects.get(id=pk)
+    topic = Topic.objects.all()
     form = RoomForm(instance=room)
     if request.user != room.host:
         return HttpResponse('404')
@@ -131,7 +139,7 @@ def updateRoom(request, pk):
         if form.is_valid():
             form.save()
             return redirect('home')
-    context = {'form': form}
+    context = {'form': form, 'topic': topic}
     return render(request, 'base/room_form.html', context)
 
 
