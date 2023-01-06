@@ -154,7 +154,7 @@ def deleteRoom(request, pk):
         room.delete()
         return redirect('home')
     context = {'obj': room}
-    return render(request, 'base/delete_room.html', context)
+    return render(request, 'base/delete.html', context)
 
 
 @login_required(login_url='signin')
@@ -166,7 +166,7 @@ def deleteMessage(request, pk):
         message.delete()
         return redirect('home')
     context = {'obj': message}
-    return render(request, 'base/delete_room.html', context)
+    return render(request, 'base/delete.html', context)
 
 
 @login_required(login_url='signin')
@@ -179,7 +179,9 @@ def editProfile(request):
         if form.is_valid():
             form.save()
             return redirect('profile', username=user.username )
-
-
     context = {'user': user, 'form': form}
     return render(request, 'base/edituser.html', context)
+
+def topics(request):
+    topics = Topic.objects.all()
+    return render(request, 'base/topics.html', {'topics':topics})
