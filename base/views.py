@@ -65,7 +65,7 @@ def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
     rooms = Room.objects.filter(Q(topic__name__icontains=q) | Q(
         name__icontains=q) | Q(description__icontains=q))
-    topics = Topic.objects.all()
+    topics = Topic.objects.all()[0:5]
     room_messages = Message.objects.filter(Q(room__name__icontains=q))
     context = {'rooms': rooms, 'topics': topics, 'room_messages': room_messages,
                'room_count': str(len(rooms)), 'text': q}
@@ -92,9 +92,9 @@ def profile(request, username):
 def room(request, pk):
     room = Room.objects.get(id=pk)
     room_messages = room.message_set.all().order_by('-created')
-    participants = room.participants.all()
+    participants = room.participants.all().reverse
     if request.method == "POST" and request.user.is_authenticated:
-        message = Message.objects.create(
+        Message.objects.create(
             user=request.user,
             room=room,
             body=request.POST.get('body')
@@ -178,10 +178,23 @@ def editProfile(request):
         form = UserForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect('profile', username=user.username )
+            return redirect('profile', username=user.username)
     context = {'user': user, 'form': form}
     return render(request, 'base/edituser.html', context)
 
+
 def topics(request):
-    topics = Topic.objects.all()
-    return render(request, 'base/topics.html', {'topics':topics})
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    topics = Topic.objects.filter(name__icontains=q)
+    topics_count = Topic.objects.all().count
+    context = {'topics': topics, 'q': q, 'topics_count': topics_count}
+    return render(request, 'base/topics.html', context)
+
+
+def activity(request):
+    # q = request.GET.get('q') if request.GET.get('q') != None else ''
+    # topics = Topic.objects.filter(name__icontains=q)
+    # topics_count = Topic.objects.all().count
+    room_messages = Message.objects.all()
+    context = {'room_messages': room_messages}
+    return render(request, 'base/activity.html', context)
