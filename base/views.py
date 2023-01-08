@@ -2,18 +2,16 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.db.models import Q
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
-from .models import Room, Topic, Message
-from .forms import RoomForm, UserForm
+from .models import Room, Topic, Message, User
+from .forms import RoomForm, UserForm, ProfileCreationForm
 
 
 def signup(request):
-    form = UserCreationForm()
+    form = ProfileCreationForm()
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = ProfileCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
@@ -28,7 +26,7 @@ def signup(request):
                 request, 'Ann error occured during signup! Try again')
 
     context = {'form': form}
-    return render(request, 'base/signup.html', context)
+    return render(request, 'base/profile/signup.html', context)
 
 
 def signin(request):
@@ -51,7 +49,7 @@ def signin(request):
         else:
             messages.error(request, 'Password went wrong')
     context = {}
-    return render(request, 'base/signin.html', context)
+    return render(request, 'base/profile/signin.html', context)
 
 
 def signout(request):
@@ -84,7 +82,7 @@ def profile(request, username):
         topics = Topic.objects.all()
         context = {'user': profile, 'rooms': rooms,
                    'room_messages': room_messages, 'topics': topics}
-        return render(request, 'base/profile.html', context)
+        return render(request, 'base/profile/profile.html', context)
     else:
         return HttpResponse('404')
 
@@ -103,7 +101,7 @@ def room(request, pk):
         return redirect('room', pk=room.id)
     context = {'room': room, 'room_messages': room_messages,
                'participants': participants}
-    return render(request, 'base/room.html', context)
+    return render(request, 'base/room/room.html', context)
 
 
 @login_required(login_url='signin')
@@ -123,7 +121,7 @@ def createRoom(request):
         #     room.participants.add(request.user)
         return redirect('home')
     context = {'form': form, 'topics': topics}
-    return render(request, 'base/room_form.html', context)
+    return render(request, 'base/room/room_form.html', context)
 
 
 @login_required(login_url='signin')
@@ -142,7 +140,7 @@ def updateRoom(request, pk):
         room.save()
         return redirect('home')
     context = {'form': form, 'room': room, 'topic': topic}
-    return render(request, 'base/room_form.html', context)
+    return render(request, 'base/room/room_form.html', context)
 
 
 @login_required(login_url='signin')
@@ -154,7 +152,7 @@ def deleteRoom(request, pk):
         room.delete()
         return redirect('home')
     context = {'obj': room}
-    return render(request, 'base/delete.html', context)
+    return render(request, 'base/room/delete.html', context)
 
 
 @login_required(login_url='signin')
@@ -166,7 +164,7 @@ def deleteMessage(request, pk):
         message.delete()
         return redirect('home')
     context = {'obj': message}
-    return render(request, 'base/delete.html', context)
+    return render(request, 'base/room/delete.html', context)
 
 
 @login_required(login_url='signin')
@@ -175,12 +173,12 @@ def editProfile(request):
     form = UserForm(instance=user)
 
     if request.method == 'POST':
-        form = UserForm(request.POST, instance=user)
+        form = UserForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
             return redirect('profile', username=user.username)
     context = {'user': user, 'form': form}
-    return render(request, 'base/edituser.html', context)
+    return render(request, 'base/profile/edituser.html', context)
 
 
 def topics(request):
@@ -192,9 +190,6 @@ def topics(request):
 
 
 def activity(request):
-    # q = request.GET.get('q') if request.GET.get('q') != None else ''
-    # topics = Topic.objects.filter(name__icontains=q)
-    # topics_count = Topic.objects.all().count
     room_messages = Message.objects.all()
     context = {'room_messages': room_messages}
     return render(request, 'base/activity.html', context)
